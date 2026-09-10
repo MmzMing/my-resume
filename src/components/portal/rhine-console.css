@@ -1,0 +1,385 @@
+/*
+ * Standalone Rhine Lab workbench pages share the portal's terminal language:
+ * warm paper field, hairline dossier chrome, amber index marks.
+ */
+
+.rhine-console {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #e8e5e1;
+  color: #171713;
+  font-family:
+    "Alibaba PuHuiTi",
+    "MiSans",
+    "Noto Sans SC",
+    "PingFang SC",
+    "Microsoft YaHei",
+    system-ui,
+    sans-serif;
+  font-synthesis: none;
+}
+
+/* Lock the document shell so only the content pane scrolls. */
+html:has(.rhine-console),
+body:has(.rhine-console) {
+  height: 100%;
+  overflow: hidden;
+}
+
+.rhine-console__top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 18px 44px 0;
+}
+
+.rhine-console__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  margin: 0 auto 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.rhine-console__brand:hover {
+  color: #9b7247;
+}
+
+.rhine-console__brand:hover .rhine-console__brand-sub {
+  color: #9b7247;
+}
+
+.rhine-console__brand-mark {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  line-height: 1;
+  color: #171713;
+}
+
+.rhine-console__brand:hover .rhine-console__brand-mark {
+  color: #9b7247;
+}
+
+.rhine-console__brand-sub {
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  color: #8d8a80;
+  transition: color 0.2s;
+}
+
+.rhine-console__brand-sub i {
+  font-style: normal;
+  color: #b6b0a2;
+  margin: 0 6px;
+}
+
+.rhine-console__nav {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 28px;
+}
+
+.rhine-console__nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  font-size: 11px;
+  letter-spacing: 1.1px;
+  color: #55534c;
+  text-decoration: none;
+  transition: color 0.25s;
+}
+
+.rhine-console__nav a:hover {
+  color: #9b7247;
+}
+
+.rhine-console__nav a[aria-current="page"] {
+  color: #171713;
+}
+
+.rhine-console__nav a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: #171713;
+}
+
+.rhine-console__glyph {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.72;
+}
+
+.rhine-console__nav a:hover .rhine-console__glyph,
+.rhine-console__nav a[aria-current="page"] .rhine-console__glyph {
+  opacity: 1;
+}
+
+.rhine-console__zh {
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: #8d8a80;
+  padding-left: 8px;
+  border-left: 1px solid #c8c4ba;
+  transition: color 0.25s;
+}
+
+.rhine-console__nav a:hover .rhine-console__zh {
+  color: #9b7247;
+}
+
+.rhine-console__frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin: 22px 44px 28px;
+  background: #f2efe9;
+  border: 1px solid #cfc9bd;
+  box-shadow: 0 18px 50px rgba(40, 36, 28, 0.1);
+  overflow: hidden;
+  animation: rhine-console-rise 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.rhine-console__header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 22px;
+  border-bottom: 1px solid #ded8cb;
+  background: #f2efe9;
+}
+
+.rhine-console__header-brand {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  color: #55534c;
+}
+
+.rhine-console__header-brand i {
+  font-style: normal;
+  color: #b6b0a2;
+  margin: 0 6px;
+}
+
+.rhine-console__index {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-right: auto;
+}
+
+.rhine-console__index b {
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  color: #9b7247;
+  font-weight: 600;
+}
+
+.rhine-console__index em {
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  color: #8d8a80;
+}
+
+.rhine-console__rule {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 30px;
+  padding: 0 22px;
+  background: #ece8e0;
+  border-bottom: 1px solid #ded8cb;
+}
+
+.rhine-console__rule i {
+  flex: 1;
+  height: 1px;
+  background: #d3ccbd;
+}
+
+.rhine-console__rule span {
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  color: #9d988b;
+}
+
+.rhine-console__body {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #bdb6a6 transparent;
+}
+
+.rhine-console__content {
+  min-height: 100%;
+  padding: 26px 30px 40px;
+}
+
+.rhine-console__foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 22px;
+  border-top: 1px solid #ded8cb;
+  background: #ece8e0;
+  font-size: 10px;
+  letter-spacing: 1.3px;
+  color: #8d8a80;
+}
+
+.rhine-console__light {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7f9a5c;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+
+@keyframes rhine-console-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rhine-console__frame {
+    animation: none;
+  }
+}
+
+/* Theme reused workbench pages so they inherit the terminal palette. */
+.rhine-console__content .text-3xl,
+.rhine-console__content h2 {
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  letter-spacing: 1px !important;
+  color: #171713 !important;
+}
+
+.rhine-console__content .text-muted-foreground,
+.rhine-console__content .text-gray-500 {
+  color: #8d8a80 !important;
+}
+
+.rhine-console__content [class*="rounded-xl"],
+.rhine-console__content [class*="rounded-lg"],
+.rhine-console__content [class*="rounded-2xl"] {
+  border-radius: 2px !important;
+}
+
+.rhine-console__content .border,
+.rhine-console__content [class*="border-gray"],
+.rhine-console__content [class*="border-border"] {
+  border-color: #ded8cb !important;
+}
+
+.rhine-console__content .bg-white,
+.rhine-console__content .bg-card {
+  background: #f7f5f0 !important;
+}
+
+.rhine-console__content .bg-gray-50,
+.rhine-console__content .bg-muted,
+.rhine-console__content .bg-accent {
+  background: #ece8e0 !important;
+}
+
+.rhine-console__content .bg-primary,
+.rhine-console__content button[class*="bg-primary"] {
+  background: #3a382f !important;
+  color: #f2efe9 !important;
+}
+
+.rhine-console__content .text-primary {
+  color: #9b7247 !important;
+}
+
+.rhine-console__content input,
+.rhine-console__content textarea,
+.rhine-console__content select {
+  border-radius: 1px !important;
+  border-color: #cfc9bd !important;
+  background: #fbfaf7 !important;
+  color: #171713 !important;
+}
+
+.rhine-console__content input:focus-visible,
+.rhine-console__content textarea:focus-visible,
+.rhine-console__content select:focus-visible {
+  outline: 1px solid #9b7247 !important;
+  outline-offset: 1px;
+}
+
+.rhine-console__content button:focus-visible,
+.rhine-console__content a:focus-visible,
+.rhine-console__brand:focus-visible {
+  outline: 1px solid #9b7247 !important;
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .rhine-console__top {
+    flex-wrap: wrap;
+    row-gap: 12px;
+    padding: 14px 16px 0;
+  }
+
+  .rhine-console__nav {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 14px 18px;
+  }
+
+  .rhine-console__zh {
+    display: none;
+  }
+
+  .rhine-console__frame {
+    margin: 14px 12px 16px;
+  }
+
+  .rhine-console__content {
+    padding: 18px 16px 32px;
+  }
+
+  .rhine-console__foot {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}

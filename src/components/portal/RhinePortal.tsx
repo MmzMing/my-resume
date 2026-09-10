@@ -2,6 +2,14 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useResumeStore } from "@/store/useResumeStore";
 import { templateById } from "@/rhine/data";
+import type { PortalPanelId } from "@/lib/portal-nav";
+
+const DASHBOARD_PATH: Record<PortalPanelId, string> = {
+  resumes: "/app/dashboard/resumes",
+  templates: "/app/dashboard/templates",
+  ai: "/app/dashboard/ai",
+  settings: "/app/dashboard/settings",
+};
 
 /**
  * Full-viewport Rhine Lab terminal portal.
@@ -10,6 +18,9 @@ import { templateById } from "@/rhine/data";
  * `@/rhine`. It is loaded lazily on the client (never during SSR) and must be
  * torn down on unmount: render loop, global listeners and the WebGL context
  * all release through the function returned by mount.
+ *
+ * The top-right nav routes into standalone Rhine-console pages so each
+ * workbench surface keeps portal chrome without covering the 3D archive.
  */
 export default function RhinePortal() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -29,13 +40,18 @@ export default function RhinePortal() {
       // The route may have changed while the chunk was loading.
       if (cancelled || !host.isConnected) return;
       destroy = mountRhinePortal(host, {
-        onEnterApp: () => navigate({ to: "/app/dashboard" }),
+        onNavigateApp: (target) => {
+          navigate({ to: DASHBOARD_PATH[target] });
+        },
+        onEnterApp: () => {
+          navigate({ to: DASHBOARD_PATH.resumes });
+        },
         onUseTemplate: (templateId) => {
           // Same flow as the templates page: create a resume preconfigured
           // with the picked template, then jump straight into the workbench.
           const template = templateById(templateId);
           if (!template) {
-            navigate({ to: "/app/dashboard/templates" });
+            navigate({ to: DASHBOARD_PATH.templates });
             return;
           }
           const resumeId = createResume(templateId);

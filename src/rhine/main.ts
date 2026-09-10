@@ -25,11 +25,16 @@ import {
 } from "./data";
 import { logo, brandHeading } from "./brand";
 
+/** Workbench destinations reachable from the portal's top-right nav. */
+export type RhineNavTarget = "resumes" | "templates" | "ai" | "settings";
+
 export interface RhinePortalOptions {
-  /** Called when the user picks the "进入工作台" action in the portal nav. */
+  /** Called when the user picks "进入工作台" action in the portal nav. */
   onEnterApp?: () => void;
   /** Called when the user picks "使用此模板" — starts editing with that template. */
   onUseTemplate?: (templateId: string) => void;
+  /** Called by the top-right nav, which replaces the old workbench sidebar. */
+  onNavigateApp?: (target: RhineNavTarget) => void;
 }
 
 /**
@@ -55,11 +60,11 @@ $("#stage").innerHTML = `
   <div class="scene-atmosphere archive-atmosphere"></div>
   <div id="boot-background" class="boot-background"><svg viewBox="0 0 1920 1080" preserveAspectRatio="none"><g fill="none" stroke="#fff" stroke-width="3"><path d="M-210 705C-45 705 182 704 247 567C337 377 99 306 4 435S27 680 169 631C309 584 227 314 279 111S568-113 568-113"/><path d="M1560-80C1374 114 1671 168 1601 323S1371 367 1431 480S1692 666 1559 787S1329 886 1498 1130"/><circle cx="1450" cy="648" r="346"/><circle cx="1450" cy="648" r="348"/></g></svg></div>
   <header class="brand">${brandHeading}</header>
-  <nav class="system-nav" aria-label="系统导航">
-    <button data-action="enter-app" class="enter-app" title="进入简历工作台">RESUME EDITOR <span class="key">↗</span></button>
-    <button data-action="search"><span class="nav-glyph">⌕</span> ARCHIVE INDEX <span class="key">/</span></button>
-    <button data-action="saved" aria-label="查看收藏档案" title="收藏档案">＋ SAVED <span id="saved-count">00</span></button>
-    <button class="settings-button" data-action="settings" aria-label="系统设置" title="系统设置"><span class="settings-glyph" aria-hidden="true">◷</span><span class="settings-label">设置</span></button>
+  <nav class="system-nav" aria-label="工作台导航">
+    <button data-nav-app="resumes"><span class="nav-glyph" aria-hidden="true">◫</span> MY RESUMES <span class="nav-zh">我的简历</span></button>
+    <button data-nav-app="templates"><span class="nav-glyph" aria-hidden="true">◈</span> TEMPLATES <span class="nav-zh">简历模板</span></button>
+    <button data-nav-app="ai"><span class="nav-glyph" aria-hidden="true">◉</span> AI PROVIDERS <span class="nav-zh">AI服务商</span></button>
+    <button data-nav-app="settings"><span class="nav-glyph" aria-hidden="true">◷</span> SETTINGS <span class="nav-zh">通用设置</span></button>
   </nav>
   <button id="skip" class="skip" data-action="skip">ENTER SYSTEM <span>↗</span></button>
   <section id="boot" class="boot" aria-label="系统启动">
@@ -104,7 +109,7 @@ let mode: Mode = "boot",
   bootStart = 0,
   lastStep = "",
   ready = false;
-let modal: "search" | "saved" | "settings" | "preview" | null = null,
+let modal: "search" | "settings" | "preview" | null = null,
   searchQuery = "",
   filter = categories[0];
 let activeTab = "overview";
@@ -137,7 +142,6 @@ let modalTransition: SurfaceTransition | undefined;
 let modalClosing = false;
 let modalSiblings: { node: HTMLElement; inert: boolean }[] = [];
 let pendingDetailFocus = false;
-let bookmarkFeedback: Animation | undefined;
 function readLocal<T>(key: string, fallback: T): T {
   try {
     return JSON.parse(localStorage.getItem(key) ?? "null") ?? fallback;
@@ -145,7 +149,6 @@ function readLocal<T>(key: string, fallback: T): T {
     return fallback;
   }
 }
-const saved = new Set<string>(readLocal<string[]>("rhine-saved", []));
 const storedPrefs = readLocal<Partial<{ reduced: boolean; quality: boolean; rendering: RenderQuality }>>("rhine-settings", {});
 const prefs = {
   reduced: matchMedia("(prefers-reduced-motion: reduce)").matches,
@@ -227,7 +230,6 @@ function savePrefs() {
     detailTransition.finish();
     modalTransition?.finish();
     tabTransition.cancel();
-    bookmarkFeedback?.cancel();
   }
   scene?.setReduced(prefs.reduced);
   scene?.setQuality(prefs.rendering);
@@ -416,7 +418,6 @@ function updateSelection(navigation?: ArchiveNavigation) {
     button.classList.toggle("selected", index === selected);
     button.setAttribute("aria-pressed", String(index === selected));
   });
-  $("#saved-count").textContent = String(saved.size).padStart(2, "0");
 }
 function replayBoot(forcePreview = false) {
   if (!ready) return;
@@ -436,26 +437,6 @@ function openFile() {
   closeModal(() => {
     setMode("detail");
   });
-}
-function toggleSaved() {
-  const id = records[selected].id;
-  if (saved.has(id)) saved.delete(id);
-  else saved.add(id);
-  try {
-    localStorage.setItem("rhine-saved", JSON.stringify([...saved]));
-  } catch {}
-  $("#saved-count").textContent = String(saved.size).padStart(2, "0");
-  const button = $<HTMLButtonElement>('[data-action="bookmark"]');
-  const added = saved.has(id);
-  button.firstChild!.textContent = added ? "− REMOVE FROM SAVED" : "＋ SAVE ARCHIVE";
-  button.querySelector("span")!.textContent = added ? "已收藏" : "收藏档案";
-  button.setAttribute("aria-pressed", String(added));
-  bookmarkFeedback?.cancel();
-  if (!prefs.reduced) bookmarkFeedback = button.animate(
-    [{ backgroundColor: "#67634c" }, { backgroundColor: "#252820" }],
-    { duration: 220, easing: "ease-out" },
-  );
-  notify(saved.has(id) ? "档案已加入收藏" : "已取消收藏");
 }
 function renderDetail() {
   tabTransition.cancel();
@@ -558,30 +539,24 @@ function closeModal(afterClose?: () => void) {
 function renderModal() {
   if (!modal) return;
   modalTransition?.dispose();
-  const directoryBody =
-    modal === "saved"
-      ? `<h2>SAVED ARCHIVES<small>收藏档案</small></h2><div id="search-results" class="search-results saved-results"></div><div class="modal-bottom"><span id="result-count"></span><span>TEMPLATE LIBRARY <i>●</i> CONNECTED</span></div>`
-      : `<h2>ARCHIVE INDEX<small>模板库检索</small></h2><div class="search-field"><span>⌕</span><input id="archive-search" type="search" autocomplete="off" placeholder="输入模板编号、名称或布局" aria-label="检索模板"/><span class="key">ESC</span></div><div class="category-filters">${categories.map((c, i) => `<button data-filter="${escapeHtml(c)}" class="${i === 0 ? "active" : ""}">${escapeHtml(c)}</button>`).join("")}</div><div class="result-header"><span>TEMPLATE / 模板</span><span>LAYOUT / 布局</span><span>ACCESS</span></div><div id="search-results" class="search-results"></div><div class="modal-bottom"><span id="result-count"></span><span>TEMPLATE LIBRARY <i>●</i> CONNECTED</span></div>`;
+  const directoryBody = `<h2>ARCHIVE INDEX<small>模板库检索</small></h2><div class="search-field"><span>⌕</span><input id="archive-search" type="search" autocomplete="off" placeholder="输入模板编号、名称或布局" aria-label="检索模板"/><span class="key">ESC</span></div><div class="category-filters">${categories.map((c, i) => `<button data-filter="${escapeHtml(c)}" class="${i === 0 ? "active" : ""}">${escapeHtml(c)}</button>`).join("")}</div><div class="result-header"><span>TEMPLATE / 模板</span><span>LAYOUT / 布局</span><span>ACCESS</span></div><div id="search-results" class="search-results"></div><div class="modal-bottom"><span id="result-count"></span><span>TEMPLATE LIBRARY <i>●</i> CONNECTED</span></div>`;
   const previewBody = (() => {
     if (modal !== "preview") return "";
     const r = records[selected];
-    const isSaved = saved.has(r.id);
-    return `<h2>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></h2><div class="preview-stage"><img src="${escapeHtml(r.snapshot)}" alt="${escapeHtml(r.title)}模板预览"/></div><p class="preview-abstract">${escapeHtml(r.abstract)}</p><div class="detail-actions"><button class="solid-button" data-action="bookmark" aria-pressed="${isSaved}">${isSaved ? "− REMOVE FROM SAVED" : "＋ SAVE ARCHIVE"}<span>${isSaved ? "已收藏" : "收藏档案"}</span></button><button class="solid-button" data-action="use-template">USE TEMPLATE <span>使用此模板</span></button></div>`;
+    return `<h2>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></h2><div class="preview-stage"><img src="${escapeHtml(r.snapshot)}" alt="${escapeHtml(r.title)}模板预览"/></div><p class="preview-abstract">${escapeHtml(r.abstract)}</p><div class="detail-actions"><button class="solid-button" data-action="use-template">USE TEMPLATE <span>使用此模板</span></button></div>`;
   })();
   $("#modal-root").innerHTML =
-    `<div class="modal-backdrop"><section class="terminal-modal ${modal === "settings" ? "settings-modal" : ""} ${modal === "preview" ? "preview-modal" : ""}" role="dialog" aria-modal="true" aria-label="${modal === "settings" ? "系统设置" : modal === "saved" ? "收藏档案" : modal === "preview" ? "预览模板" : "模板检索"}"><div class="modal-top"><span>RHINE LAB / ${modal === "settings" ? "SYSTEM PREFERENCES" : modal === "preview" ? "TEMPLATE PREVIEW" : "TEMPLATE DIRECTORY"}</span><button data-action="close-modal" aria-label="关闭窗口">CLOSE <span>×</span></button></div>${modal === "settings" ? settingsMarkup() : modal === "preview" ? previewBody : directoryBody}</section></div>`;
+    `<div class="modal-backdrop"><section class="terminal-modal ${modal === "settings" ? "settings-modal" : ""} ${modal === "preview" ? "preview-modal" : ""}" role="dialog" aria-modal="true" aria-label="${modal === "settings" ? "系统设置" : modal === "preview" ? "预览模板" : "模板检索"}"><div class="modal-top"><span>RHINE LAB / ${modal === "settings" ? "SYSTEM PREFERENCES" : modal === "preview" ? "TEMPLATE PREVIEW" : "TEMPLATE DIRECTORY"}</span><button data-action="close-modal" aria-label="关闭窗口">CLOSE <span>×</span></button></div>${modal === "settings" ? settingsMarkup() : modal === "preview" ? previewBody : directoryBody}</section></div>`;
   const backdrop = $(".modal-backdrop");
   backdrop.hidden = true;
   modalTransition = new SurfaceTransition(backdrop, $(".terminal-modal"));
   modalTransition.show(prefs.reduced);
   if (modal === "settings") updateQualitySummary();
-  if (modal === "search" || modal === "saved") {
+  if (modal === "search") {
     renderResults();
     requestAnimationFrame(() => {
       if (!backdrop.isConnected || modalClosing) return;
-      if (modal === "saved")
-        ($("#search-results").querySelector<HTMLElement>(".saved-card") ?? $('[data-action="close-modal"]')).focus();
-      else $("#archive-search").focus();
+      $("#archive-search").focus();
     });
   } else {
     requestAnimationFrame(() => {
@@ -602,33 +577,21 @@ function renderResults() {
     .map((r, i) => ({ r, i }))
     .filter(
       ({ r }) =>
-        (modal !== "saved" || saved.has(r.id)) &&
         (filter === categories[0] || r.category === filter) &&
         `${r.id} ${r.title} ${r.en} ${r.department} ${r.lead}`
           .toLowerCase()
           .includes(searchQuery.toLowerCase()),
     );
-  if (modal === "saved") {
-    $("#search-results").innerHTML = results.length
-      ? `<div class="saved-grid">${results
-          .map(
-            ({ r, i }) =>
-              `<button class="saved-card" data-result="${i}" title="${r.id} · ${escapeHtml(r.title)}"><span class="saved-snapshot"><img src="${escapeHtml(r.snapshot)}" alt="${escapeHtml(r.title)}模板预览" loading="lazy"/></span><span class="saved-caption"><b>${r.id}</b><strong>${escapeHtml(r.title)}</strong><small>${escapeHtml(r.department)}</small></span></button>`,
-          )
-          .join("")}</div>`
-      : `<div class="empty-results"><span>∅</span><strong>尚无收藏模板</strong><p>浏览模板时，选择 SAVE ARCHIVE 将其保存在此处。</p><button data-action="reset-search">浏览全部模板 →</button></div>`;
-  } else {
-    $("#search-results").innerHTML = results.length
-      ? results
-          .map(
-            ({ r, i }) =>
-              `<button class="result-row" data-result="${i}"><span class="result-name"><b>${r.id}</b><span>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></span>${saved.has(r.id) ? "<i>＋</i>" : ""}</span><span>${escapeHtml(r.department)}</span><span>AUTHORIZED <i>↗</i></span></button>`,
-          )
-          .join("")
-      : `<div class="empty-results"><span>∅</span><strong>没有匹配的模板</strong><p>尝试其他名称、模板编号，或切换风格分类。</p><button data-action="reset-search">重置检索 →</button></div>`;
-  }
+  $("#search-results").innerHTML = results.length
+    ? results
+        .map(
+          ({ r, i }) =>
+            `<button class="result-row" data-result="${i}"><span class="result-name"><b>${r.id}</b><span>${escapeHtml(r.title)}<small>${escapeHtml(r.en)}</small></span></span><span>${escapeHtml(r.department)}</span><span>AUTHORIZED <i>↗</i></span></button>`,
+        )
+        .join("")
+    : `<div class="empty-results"><span>∅</span><strong>没有匹配的模板</strong><p>尝试其他名称、模板编号，或切换风格分类。</p><button data-action="reset-search">重置检索 →</button></div>`;
   $("#result-count").textContent =
-    `${String(results.length).padStart(2, "0")} ${modal === "saved" ? "TEMPLATES SAVED" : "TEMPLATES FOUND"}`;
+    `${String(results.length).padStart(2, "0")} TEMPLATES FOUND`;
 }
 function updateQualitySummary() {
   const summary = document.querySelector("#quality-summary");
@@ -677,10 +640,16 @@ const onDocumentChange = (e: Event) => {
 };
 document.addEventListener("change", onDocumentChange);
 const onDocumentClick = (e: MouseEvent) => {
-  if (!started) return;
   if (modalClosing) return;
   const el = (e.target as Element).closest<HTMLElement>("button");
   if (!el) return;
+  // Workbench nav must stay live even during boot: otherwise the top-right
+  // controls look present but swallow every click until startup finishes.
+  if (el.dataset.navApp) {
+    options.onNavigateApp?.(el.dataset.navApp as RhineNavTarget);
+    return;
+  }
+  if (!started) return;
   if (el.dataset.select) {
     select(Number(el.dataset.select));
     return;
@@ -739,7 +708,7 @@ const onDocumentClick = (e: MouseEvent) => {
   if (action === "back") {
     setMode("archive");
   }
-  if (action === "search" || action === "saved" || action === "settings") {
+  if (action === "search" || action === "settings") {
     el.focus({ preventScroll: true });
     openModal(action);
   }
@@ -752,7 +721,6 @@ const onDocumentClick = (e: MouseEvent) => {
     closeModal(() => options.onUseTemplate?.(templateId));
   }
   if (action === "close-modal") closeModal();
-  if (action === "bookmark") toggleSaved();
   if (action === "reset-search") {
     modal = "search";
     searchQuery = "";
@@ -1067,7 +1035,6 @@ Object.assign(window, {
       motion: { reduced: prefs.reduced, systemReduced: matchMedia("(prefers-reduced-motion: reduce)").matches },
       bootTime: mode === "boot" ? started ? (frozenTime ?? performance.now() / 1000 - bootStart) + 5 : 6.76 : null,
       selected: records[selected].id,
-      saved: [...saved],
     }),
   },
 });

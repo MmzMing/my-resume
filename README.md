@@ -100,6 +100,26 @@ This will:
 - Start the container in the background
 
 
+## 🌐 Portal (Rhine Lab Terminal)
+
+The app homepage is not a classic marketing landing page. It is an interactive **Rhine Lab 3D archive terminal**: a white-screen boot sequence opens into a looping five-column archive array, where you can pick a template, watch glass decryption and document reveal, then enter the resume workbench from the top-right navigation.
+
+This portal is adapted from the open-source project **[RhineLabUI](https://github.com/LBEILC/RhineLabUI)**:
+
+- The original is an unofficial recreation of the *Arknights* special feature “Rhine Lab: Access” terminal UI
+- Original author / copyright: **LBEILC** (Copyright (c) 2026 LBEILC)
+- Original demo: [rhine.lubeiluchen.cc](https://rhine.lubeiluchen.cc/)
+- Reference PV: [BV1rr4y1b7sz](https://www.bilibili.com/video/BV1rr4y1b7sz/)
+
+Portal code in this repo lives under `src/rhine/`. Boot, archive browsing, template detail, and the 360° model viewer are retained, while workbench actions route into this app’s resumes, templates, AI providers, and settings pages.
+
+## 📚 References and Resources
+
+- **Reference work**: *Arknights* special feature “Rhine Lab: Access”. This project is not affiliated with the official creators. Rights to the original PV, related names, logos, and settings remain with their respective owners. Archive summaries and demo data added for this integration are extensions, not original PV content.
+- **RhineLabUI**: The 3D portal, boot animation, archive array, and model viewer are primarily adapted from [LBEILC/RhineLabUI](https://github.com/LBEILC/RhineLabUI) (MIT). Models were rebuilt in that project; real-time refraction, lighting, and details still differ from the original PV. The authorization screen is a demo state machine and does not connect to real identity services.
+- **Fonts**: When MiSans or similar font files are used by the portal, they remain subject to Xiaomi’s official font license and the copyright notes shipped with the original project.
+- **Third-party dependencies**: Rolling Number, Three.js, and others keep their own licenses.
+
 ## 📝 License and Usage Restrictions
 
 The source code of this project is released under the **Apache 2.0** license with an additional **non-commercial use restriction**:
@@ -108,6 +128,18 @@ The source code of this project is released under the **Apache 2.0** license wit
 - **Commercial Use Prohibited**: The project may not be used for any commercial purpose, including providing it as a paid or profit-generating service (such as SaaS/PaaS), enterprise commercial operations, resale, or secondary commercial development, **regardless of whether the source code has been modified**.
 
 Please see the [LICENSE](LICENSE) file for detailed terms.
+
+### Portal open-source license
+
+Program code, modeling scripts, and accompanying technical documentation in the original [RhineLabUI](https://github.com/LBEILC/RhineLabUI) project that the author had the right to license are released under the **MIT License**, with copyright attributed to **Copyright (c) 2026 LBEILC**.
+
+The MIT grant does not cover third-party rights:
+
+- *Arknights* and Rhine Lab related names, logos, settings, the original PV, and original visual design are not granted additional rights by open-sourcing this project.
+- Blender / GLB models, images, and other non-code assets are not separately declared MIT.
+- MiSans, Rolling Number, and other third-party dependencies remain under their own licenses.
+
+When reusing portal code, keep the copyright notice above and handle third-party assets and marks according to your use case. Magic Resume itself remains under this repository’s Apache 2.0 license with the non-commercial restriction.
 
 ## 🗺️ Roadmap
 

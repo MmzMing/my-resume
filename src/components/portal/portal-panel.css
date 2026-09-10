@@ -1,0 +1,268 @@
+/*
+ * Workbench panels reuse the portal's terminal language so the four pages
+ * read as part of the Rhine Lab console instead of a separate dashboard.
+ * Only the shell is themed here; page internals are overridden below so the
+ * existing shadcn components inherit the same palette and typography.
+ */
+
+.portal-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family:
+    "Alibaba PuHuiTi", "MiSans", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  color: #171713;
+}
+
+.portal-panel__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(232, 229, 225, 0.82);
+  backdrop-filter: blur(6px);
+  animation: portal-panel-fade 0.22s ease-out;
+}
+
+.portal-panel__frame {
+  position: relative;
+  width: min(1440px, calc(100vw - 96px));
+  height: min(900px, calc(100vh - 96px));
+  display: flex;
+  flex-direction: column;
+  background: #f2efe9;
+  border: 1px solid #cfc9bd;
+  box-shadow: 0 24px 70px rgba(40, 36, 28, 0.16);
+  animation: portal-panel-rise 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+  overflow: hidden;
+}
+
+.portal-panel__top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 22px;
+  border-bottom: 1px solid #ded8cb;
+}
+
+.portal-panel__brand {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  color: #55534c;
+}
+
+.portal-panel__brand i {
+  color: #b6b0a2;
+  font-style: normal;
+  margin: 0 6px;
+}
+
+.portal-panel__index {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-right: auto;
+}
+
+.portal-panel__index b {
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  color: #9b7247;
+}
+
+.portal-panel__index em {
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  color: #8d8a80;
+}
+
+.portal-panel__close {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  color: #55534c;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+
+.portal-panel__close:hover {
+  color: #9b7247;
+}
+
+.portal-panel__close span {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.portal-panel__rule {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 22px;
+  height: 30px;
+  background: #ece8e0;
+  border-bottom: 1px solid #ded8cb;
+}
+
+.portal-panel__rule i {
+  flex: 1;
+  height: 1px;
+  background: #d3ccbd;
+}
+
+.portal-panel__rule span {
+  font-size: 9px;
+  letter-spacing: 1.6px;
+  color: #9d988b;
+}
+
+.portal-panel__body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #bdb6a6 transparent;
+}
+
+.portal-panel__content {
+  min-height: 100%;
+  padding: 26px 30px 40px;
+}
+
+.portal-panel__foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 22px;
+  border-top: 1px solid #ded8cb;
+  background: #ece8e0;
+  font-size: 10px;
+  letter-spacing: 1.3px;
+  color: #8d8a80;
+}
+
+.portal-panel__light {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #7f9a5c;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+
+@keyframes portal-panel-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes portal-panel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-panel__scrim,
+  .portal-panel__frame {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Theme the reused workbench pages so they inherit the terminal palette.
+ * ------------------------------------------------------------------------- */
+
+.portal-panel__content .text-3xl,
+.portal-panel__content h2 {
+  font-size: 17px !important;
+  font-weight: 500 !important;
+  letter-spacing: 1px !important;
+  color: #171713 !important;
+}
+
+.portal-panel__content .text-muted-foreground,
+.portal-panel__content .text-gray-500 {
+  color: #8d8a80 !important;
+}
+
+/* Cards become flat dossiers: no shadow, hairline rules, warm paper fill. */
+.portal-panel__content [class*="rounded-xl"],
+.portal-panel__content [class*="rounded-lg"],
+.portal-panel__content [class*="rounded-2xl"] {
+  border-radius: 2px !important;
+}
+
+.portal-panel__content .border,
+.portal-panel__content [class*="border-gray"],
+.portal-panel__content [class*="border-border"] {
+  border-color: #ded8cb !important;
+}
+
+.portal-panel__content .bg-white,
+.portal-panel__content .bg-card {
+  background: #f7f5f0 !important;
+}
+
+.portal-panel__content .bg-gray-50,
+.portal-panel__content .bg-muted,
+.portal-panel__content .bg-accent {
+  background: #ece8e0 !important;
+}
+
+/* Primary actions use the terminal's amber accent instead of site orange. */
+.portal-panel__content .bg-primary,
+.portal-panel__content button[class*="bg-primary"] {
+  background: #3a382f !important;
+  color: #f2efe9 !important;
+}
+
+.portal-panel__content .text-primary {
+  color: #9b7247 !important;
+}
+
+.portal-panel__content input,
+.portal-panel__content textarea,
+.portal-panel__content select {
+  border-radius: 1px !important;
+  border-color: #cfc9bd !important;
+  background: #fbfaf7 !important;
+  color: #171713 !important;
+}
+
+.portal-panel__content input:focus-visible,
+.portal-panel__content textarea:focus-visible,
+.portal-panel__content select:focus-visible {
+  outline: 1px solid #9b7247 !important;
+  outline-offset: 1px;
+}
+
+.portal-panel__content button:focus-visible {
+  outline: 1px solid #9b7247 !important;
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .portal-panel__frame {
+    width: 100vw;
+    height: 100vh;
+    border: 0;
+  }
+  .portal-panel__content {
+    padding: 18px 16px 32px;
+  }
+  .portal-panel__index em {
+    display: none;
+  }
+}

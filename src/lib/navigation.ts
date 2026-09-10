@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
+import { panelForRoute, usePortalNav } from "./portal-nav";
 
 type NavigateTarget =
   | string
@@ -11,11 +12,24 @@ type NavigateTarget =
 
 export function useRouter() {
   const navigate = useNavigate();
+  const openPanel = usePortalNav();
   const toNavigateOptions = (target: NavigateTarget) =>
     typeof target === "string" ? { to: target } : target;
 
   return {
-    push: (target: NavigateTarget) => navigate(toNavigateOptions(target) as any),
+    push: (target: NavigateTarget) => {
+      // Inside the Rhine Lab portal, dashboard links stay in the console.
+      if (openPanel) {
+        const panel = panelForRoute(
+          typeof target === "string" ? target : target.to,
+        );
+        if (panel) {
+          openPanel(panel);
+          return;
+        }
+      }
+      return navigate(toNavigateOptions(target) as any);
+    },
     replace: (target: NavigateTarget) =>
       navigate({ ...toNavigateOptions(target), replace: true } as any),
     back: () => window.history.back(),

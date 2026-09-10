@@ -12,7 +12,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { getConfig, getFileHandle } from "@/utils/fileSystem";
 import { preloadFontFamily } from "@/utils/fonts";
@@ -284,7 +283,7 @@ export const ResumeWorkbench = () => {
     };
 
     return (
-        <ScrollArea className="h-[calc(100vh-2rem)] w-full">
+        <div className="w-full">
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -453,6 +452,6 @@ export const ResumeWorkbench = () => {
                     onPdfFileChange={handlePdfFileChange}
                 />
             </motion.div>
-        </ScrollArea>
+        </div>
     );
 };

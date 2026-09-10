@@ -1,5 +1,6 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import DashboardLayout from "@/app/app/dashboard/client";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import RhineConsoleLayout from "@/components/portal/RhineConsoleLayout";
+import { PANEL_BY_ROUTE, type PortalPanelId } from "@/lib/portal-nav";
 
 export const Route = createFileRoute("/app/dashboard")({
   head: () => ({
@@ -9,10 +10,18 @@ export const Route = createFileRoute("/app/dashboard")({
   component: DashboardRouteLayout
 });
 
+function resolveSection(pathname: string): PortalPanelId {
+  const normalized = pathname.replace(/\/$/, "");
+  return PANEL_BY_ROUTE[normalized] ?? "resumes";
+}
+
 function DashboardRouteLayout() {
+  const location = useLocation();
+  const section = resolveSection(location.pathname);
+
   return (
-    <DashboardLayout>
+    <RhineConsoleLayout section={section}>
       <Outlet />
-    </DashboardLayout>
+    </RhineConsoleLayout>
   );
 }

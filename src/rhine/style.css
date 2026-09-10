@@ -353,31 +353,67 @@
 }
 .system-nav {
   position: absolute;
-  right: 59px;
-  top: 124px;
+  right: var(--nav-right, 44px);
+  top: var(--nav-top, 40px);
   z-index: 6;
   display: flex;
   align-items: center;
-  gap: 43px;
+  gap: 34px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.8s;
 }
 .system-nav button {
-  font-size: 14px;
+  position: relative;
+  font-size: 11px;
   line-height: 1;
   min-height: 28px;
-  letter-spacing: 0.7px;
+  letter-spacing: 1.1px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  color: #55534c;
+  transition: color 0.25s;
 }
 .system-nav button:hover {
   color: #9b7247;
 }
-.nav-glyph {
-  width: 23px;
-  height: 23px;
+.system-nav .nav-glyph {
+  font-size: 12px;
+  line-height: 1;
+  opacity: 0.72;
+  transition: opacity 0.25s;
+}
+.system-nav button:hover .nav-glyph {
+  opacity: 1;
+}
+.system-nav .nav-zh {
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: #8d8a80;
+  padding-left: 8px;
+  margin-left: 2px;
+  border-left: 1px solid #c8c4ba;
+  transition: color 0.25s;
+}
+.system-nav button:hover .nav-zh {
+  color: #9b7247;
+}
+/* The active destination becomes the current index in the terminal. */
+.system-nav button[aria-current="page"] {
+  color: #171713;
+}
+.system-nav button[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 1px;
+  background: #171713;
+}
+.system-nav button[aria-current="page"] .nav-glyph {
+  opacity: 1;
 }
 .key {
   font-size: 11px;
